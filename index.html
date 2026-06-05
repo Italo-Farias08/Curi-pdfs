@@ -1,0 +1,749 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>você me ama? 🐶</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #fdf6ee;
+    --warm: #f5ebe0;
+    --rose: #e8506a;
+    --rose-dark: #c73d56;
+    --text: #2c1810;
+    --text-muted: #8a7060;
+    --gold: #c9a96e;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--cream);
+    font-family: 'Lato', sans-serif;
+    overflow: hidden;
+  }
+
+  body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+
+  background: linear-gradient(
+    -45deg,
+    #fff5f7,
+    #ffe4ec,
+    #fff0f5,
+    #fdf6ee
+  );
+
+  background-size: 400% 400%;
+  animation: gradientMove 12s ease infinite;
+}
+@keyframes gradientMove {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  filter: blur(80px);
+  z-index: 0;
+  animation: floatGlow 10s ease-in-out infinite;
+}
+
+body::before {
+  background: rgba(255, 120, 180, 0.18);
+  top: -100px;
+  left: -100px;
+}
+
+body::after {
+  background: rgba(255, 220, 120, 0.15);
+  bottom: -100px;
+  right: -100px;
+  animation-delay: 5s;
+}
+
+@keyframes floatGlow {
+  0%,100% {
+    transform: translate(0,0);
+  }
+
+  50% {
+    transform: translate(40px,30px);
+  }
+}
+
+  /* floating petals bg */
+  .petal {
+    position: fixed;
+    pointer-events: none;
+    font-size: 14px;
+    opacity: 0;
+    animation: petalFall linear infinite;
+    z-index: 0;
+  }
+  @keyframes petalFall {
+    0%   { transform: translateY(-20px) rotate(0deg); opacity: 0; }
+    10%  { opacity: 0.35; }
+    90%  { opacity: 0.2; }
+    100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+  }
+
+  .card {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    width: min(480px, 96vw);
+    background: rgba(255,252,248,0.85);
+    border-radius: 28px;
+    border: 1px solid rgba(201,169,110,0.25);
+    padding: 2.2rem 2rem 1.8rem;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 2px 40px rgba(44,24,16,0.07);
+  }
+
+  .question {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(22px, 5vw, 30px);
+    color: var(--text);
+    text-align: center;
+    line-height: 1.25;
+    transition: all .5s ease;
+  }
+
+  .sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: .45rem;
+    min-height: 18px;
+    font-weight: 300;
+    letter-spacing: .02em;
+    transition: opacity .4s;
+  }
+
+  /* canvas */
+  #pet {
+    display: block;
+    margin: 1rem auto 0;
+    filter: drop-shadow(0 8px 18px rgba(44,24,16,0.12));
+  }
+
+  .msg {
+    min-height: 22px;
+    font-size: 13.5px;
+    color: var(--text-muted);
+    text-align: center;
+    font-style: italic;
+    letter-spacing: .01em;
+    margin-top: .2rem;
+    transition: opacity .3s;
+  }
+
+  .btns {
+    display: flex;
+    gap: 14px;
+    margin-top: 1.1rem;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-yes {
+    background: var(--rose);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 13px 40px;
+    font-size: 16px;
+    font-family: 'Lato', sans-serif;
+    font-weight: 400;
+    cursor: pointer;
+    letter-spacing: .04em;
+    transition: background .2s, transform .15s;
+  }
+  .btn-yes:hover { background: var(--rose-dark); transform: scale(1.05); }
+  .btn-yes:active { transform: scale(.96); }
+  .btn-yes:disabled { background: #d0c0b8; cursor: default; transform: none; }
+
+  .btn-no {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid rgba(138,112,96,0.3);
+    border-radius: 50px;
+    padding: 13px 36px;
+    font-size: 16px;
+    font-family: 'Lato', sans-serif;
+    cursor: pointer;
+    transition: all .35s ease;
+    transform-origin: center;
+  }
+  .btn-no:hover { border-color: rgba(138,112,96,0.6); color: var(--text); }
+
+  /* hearts burst */
+  .hearts-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 100;
+  }
+  .hp {
+    position: absolute;
+    animation: floatHp 2.2s ease-out forwards;
+    opacity: 0;
+  }
+  @keyframes floatHp {
+    0%   { transform: translateY(0) scale(.4) rotate(-15deg); opacity: 1; }
+    80%  { opacity: .8; }
+    100% { transform: translateY(-260px) scale(1.4) rotate(20deg); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hearts-layer" id="hearts"></div>
+
+<div class="card">
+  <div class="question" id="q">você me ama? 🌸</div>
+  <div class="sub" id="sub">olha nos olhos dele antes de responder...</div>
+  <canvas id="pet" width="300" height="240"></canvas>
+  <div class="msg" id="msg"></div>
+  <div class="btns">
+    <button class="btn-yes" id="bYes" onclick="handleYes()">Sim 💗</button>
+    <button class="btn-no"  id="bNo"  onclick="handleNo()">Não</button>
+  </div>
+</div>
+
+<script>
+// ─── state ───────────────────────────────────────────────────────────────────
+const C  = document.getElementById('pet');
+const X  = C.getContext('2d');
+const bNo  = document.getElementById('bNo');
+const bYes = document.getElementById('bYes');
+
+let MODE = 'idle'; // idle, sad, beg, happy, love
+let T = 0;           // frame counter
+let noCount = 0;
+let dogScale = 1;
+let idleTimer = 0;
+let idleBehavior = 'idle';  // idle | sniff | yawn | scratch | look
+let behaviorTimer = 0;
+let behaviorLen = 0;
+let isLove = false;
+
+// blink
+let blinkT = 0, blinkOpen = true, blinkDur = 0;
+// tail
+let tailPhase = 0;
+// jump
+let jumpY = 0, jumpV = 0;
+// yawn mouth
+let yawnOpen = 0, yawnDir = 1;
+// scratch leg
+let scratchPhase = 0;
+// sniff head bob
+let sniffPhase = 0;
+// ear wiggle
+let earWiggle = 0;
+// look direction
+let lookX = 0, lookTarget = 0;
+// sad tear
+let tearY = -14;
+// pant tongue
+let tongueWag = 0;
+
+// ─── behavior system ──────────────────────────────────────────────────────────
+const BEHAVIORS = ['sniff','yawn','scratch','look','idle','idle'];
+function pickBehavior(){
+  if(MODE !== 'idle') return;
+  idleBehavior = BEHAVIORS[Math.floor(Math.random()*BEHAVIORS.length)];
+  behaviorLen  = 120 + Math.floor(Math.random()*160);
+  behaviorTimer = 0;
+  if(idleBehavior==='look') lookTarget = (Math.random()-.5)*18;
+}
+
+// ─── interaction ─────────────────────────────────────────────────────────────
+bNo.addEventListener('mouseenter', onNoHover);
+bNo.addEventListener('touchstart', onNoHover, {passive:true});
+
+function onNoHover(){
+  if(MODE==='idle'||MODE==='curious'){
+    MODE='curious'; earWiggle=1;
+    setMsg('ei... não vai apertar esse aí não né? 👀');
+  }
+}
+
+function handleNo(){
+  noCount++;
+  MODE='sad'; tearY=-14;
+  const msgs=['ei... 🥺','tá doendo aqui ó...','tem certeza mesmo?','ok... eu entendo 😔'];
+  setMsg(msgs[Math.min(noCount-1,3)]);
+  const s=Math.max(0.5,1-noCount*.13), o=Math.max(.28,1-noCount*.18);
+  bNo.style.transform=`scale(${s})`;
+  bNo.style.opacity=o;
+  setTimeout(()=>{ if(MODE==='sad'){ MODE='beg'; } }, 2500);
+  dogScale = Math.min(2.2, dogScale + 0.15);
+}
+
+function handleYes(){
+  MODE='happy';
+  isLove = true;
+
+  jumpV=-9;
+
+  document.getElementById('q').textContent='eu sabia!!! 🥰';
+  document.getElementById('sub').textContent='ele sentiu também — olha a carinha dele!';
+
+  bYes.disabled=true;
+  bNo.style.display='none';
+
+  setMsg('o rabinho não para mais de abanar 💕');
+
+  for(let i=0;i<12;i++){
+    setTimeout(burst,i*300);
+  }
+}
+
+function setMsg(t){ document.getElementById('msg').textContent=t; }
+
+// ─── hearts burst ─────────────────────────────────────────────────────────────
+function burst(){
+  const H=document.getElementById('hearts');
+  const icons=['💕','💗','💖','💓','💞','🌸','✨','🥰','🩷'];
+  for(let i=0;i<11;i++){
+    const e=document.createElement('div'); e.className='hp';
+    e.textContent=icons[Math.floor(Math.random()*icons.length)];
+    e.style.cssText=`left:${5+Math.random()*90}%;bottom:${8+Math.random()*30}%;font-size:${14+Math.random()*16}px;animation-delay:${Math.random()*.6}s`;
+    H.appendChild(e); setTimeout(()=>e.remove(),2800);
+  }
+}
+
+// ─── floating petals ──────────────────────────────────────────────────────────
+(function spawnPetals(){
+  const emojis=['🌸','🌺','✿','❀'];
+  for(let i=0;i<12;i++){
+    const p=document.createElement('div'); p.className='petal';
+    p.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+    p.style.cssText=`left:${Math.random()*100}%;top:-10%;animation-duration:${8+Math.random()*10}s;animation-delay:${Math.random()*10}s;font-size:${10+Math.random()*8}px`;
+    document.body.appendChild(p);
+  }
+})();
+
+// ─── draw ─────────────────────────────────────────────────────────────────────
+function draw(){
+  X.clearRect(0,0,300,240);
+
+  const st  = MODE==='idle'||MODE==='curious' ? idleBehavior : MODE;
+  const cx  = 150;
+  let   cy  = 150;
+
+  // jump physics (happy)
+  if(MODE==='happy'){
+    jumpV += .5; jumpY += jumpV;
+    if(jumpY>=0){ jumpY=0; jumpV=0;
+      setTimeout(()=>{ jumpV=-6; },420); }
+    cy += jumpY;
+  }
+
+  // tail speed
+  let ts = .055;
+  if(MODE==='happy')  ts = .22;
+  if(MODE==='beg')    ts = .17;
+  if(MODE==='sad')    ts = .018;
+  if(MODE==='curious')ts = .09;
+  tailPhase += ts;
+
+  // blink logic
+  blinkT++;
+  const blinkInterval = MODE==='beg' ? 40 : 130;
+  if(blinkT > blinkInterval){ blinkOpen=false; blinkDur++; }
+  if(blinkDur > 6){ blinkOpen=true; blinkT=0; blinkDur=0; }
+
+  X.save();
+X.translate(cx, cy);
+X.scale(dogScale, dogScale);
+
+  // ── SHADOW ────────────────────────────────────────────────────────────────
+  X.beginPath();
+  X.ellipse(0,48,38,7,0,0,Math.PI*2);
+  X.fillStyle='rgba(44,24,16,.09)'; X.fill();
+
+  // ── TAIL ──────────────────────────────────────────────────────────────────
+  {
+    const swing = Math.sin(tailPhase) * (MODE==='happy'?0.85:MODE==='sad'?0.08:0.38);
+    X.save();
+    X.translate(-32, 2);
+    X.rotate(-0.3 + swing);
+    // tail base thick
+    X.beginPath();
+    for(let i=0;i<8;i++){
+      const frac=i/7, r=9-i, tx=i*-3.5, ty=-i*4.5;
+      if(i===0) X.moveTo(tx,ty); else X.lineTo(tx+r*Math.sin(swing*frac*2), ty);
+    }
+    // draw as tapered bezier
+    X.beginPath();
+    X.moveTo(0,0);
+    X.bezierCurveTo(-8,-12,-18,-20,-12,-34);
+    X.bezierCurveTo(-8,-44,-2,-38,0,-30);
+    X.bezierCurveTo(2,-20,4,-8,0,0);
+    X.fillStyle='#b07840'; X.fill();
+    // tail tip lighter
+    X.beginPath();
+    X.ellipse(-10,-32,6,5,-.4,0,Math.PI*2);
+    X.fillStyle='#e8c888'; X.fill();
+    X.restore();
+  }
+
+  // ── BODY ──────────────────────────────────────────────────────────────────
+  X.beginPath();
+  X.ellipse(0,14,38,30,0,0,Math.PI*2);
+  X.fillStyle='#c8903c'; X.fill();
+
+  // body shading (darker sides)
+  const bg=X.createRadialGradient(0,10,10,0,10,42);
+  bg.addColorStop(0,'rgba(255,220,160,.18)');
+  bg.addColorStop(1,'rgba(80,40,0,.13)');
+  X.beginPath(); X.ellipse(0,14,38,30,0,0,Math.PI*2);
+  X.fillStyle=bg; X.fill();
+
+  // belly cream
+  X.beginPath();
+  X.ellipse(0,20,22,20,0,0,Math.PI*2);
+  X.fillStyle='#f2d9a8'; X.fill();
+
+  // ── BACK LEGS ─────────────────────────────────────────────────────────────
+  [-28,28].forEach(sx=>{
+    X.beginPath();
+    X.ellipse(sx,36,9,11,.1*Math.sign(sx),0,Math.PI*2);
+    X.fillStyle='#b87828'; X.fill();
+    X.beginPath();
+    X.ellipse(sx+2*Math.sign(sx),46,11,6,0,0,Math.PI*2);
+    X.fillStyle='#9a6018'; X.fill();
+    // toes
+    for(let t2=-1;t2<=1;t2++){
+      X.beginPath();
+      X.ellipse(sx+2*Math.sign(sx)+t2*3.5,50,2.5,2,0,0,Math.PI*2);
+      X.fillStyle='#7a4810'; X.fill();
+    }
+  });
+
+  // ── FRONT LEGS / PAWS ────────────────────────────────────────────────────
+  if(st==='beg'){
+    // raised paws
+    [-1,1].forEach((s,i)=>{
+      const wobble=Math.sin(T*.07+i*1.5)*.08;
+      X.save();
+      X.translate(s*20, 10);
+      X.rotate(s*(-0.75+wobble));
+      X.beginPath(); X.roundRect(-7,0,14,24,7); X.fillStyle='#c8903c'; X.fill();
+      X.beginPath();
+      X.ellipse(0,28,9,6,0,0,Math.PI*2); X.fillStyle='#9a6018'; X.fill();
+      for(let t2=-1;t2<=1;t2++){
+        X.beginPath(); X.ellipse(t2*3,33,2.2,2,0,0,Math.PI*2);
+        X.fillStyle='#7a4810'; X.fill();
+      }
+      X.restore();
+    });
+  } else if(st==='scratch'){
+    // left normal, right scratching ear
+    X.save(); X.translate(-18,24);
+    X.beginPath(); X.roundRect(-6,0,12,22,6); X.fillStyle='#c8903c'; X.fill();
+    X.beginPath(); X.ellipse(0,25,8,5,0,0,Math.PI*2); X.fillStyle='#9a6018'; X.fill();
+    X.restore();
+    // scratching paw up
+    const sp = Math.sin(scratchPhase)*0.5;
+    X.save(); X.translate(20,-8+Math.sin(scratchPhase)*4);
+    X.rotate(-1.1+sp);
+    X.beginPath(); X.roundRect(-6,0,12,22,6); X.fillStyle='#c8903c'; X.fill();
+    X.beginPath(); X.ellipse(0,24,8,5,0,0,Math.PI*2); X.fillStyle='#9a6018'; X.fill();
+    X.restore();
+  } else {
+    [-18,18].forEach(sx=>{
+      X.beginPath(); X.roundRect(sx-6,22,12,24,6); X.fillStyle='#c8903c'; X.fill();
+      X.beginPath(); X.ellipse(sx,48,9,6,0,0,Math.PI*2); X.fillStyle='#9a6018'; X.fill();
+      for(let t2=-1;t2<=1;t2++){
+        X.beginPath(); X.ellipse(sx+t2*3,53,2.5,2,0,0,Math.PI*2);
+        X.fillStyle='#7a4810'; X.fill();
+      }
+    });
+  }
+
+  // ── HEAD (position changes for sniff/yawn/look) ───────────────────────────
+  let headY = -32, headTilt = 0;
+  if(st==='sniff'){ headY = -28 + Math.sin(sniffPhase)*.5; }
+  if(st==='curious'||MODE==='curious'){ headTilt = Math.sin(T*.04)*.12-.1; }
+  if(st==='look'){ headTilt = lookX * .03; }
+
+  X.save();
+  X.translate(0, headY);
+  X.rotate(headTilt);
+
+  // neck
+  X.beginPath();
+  X.ellipse(0,8,16,14,0,0,Math.PI*2);
+  X.fillStyle='#c8903c'; X.fill();
+
+  // head shape — rounder golden retriever style
+  X.beginPath();
+  X.ellipse(0,-8,30,26,0,0,Math.PI*2);
+  X.fillStyle='#c8903c'; X.fill();
+
+  // head gradient shading
+  const hg=X.createRadialGradient(4,-14,4,0,-8,34);
+  hg.addColorStop(0,'rgba(255,220,140,.22)');
+  hg.addColorStop(1,'rgba(80,40,0,.15)');
+  X.beginPath(); X.ellipse(0,-8,30,26,0,0,Math.PI*2);
+  X.fillStyle=hg; X.fill();
+
+  // muzzle
+  X.beginPath();
+  X.ellipse(0,4,17,13,0,0,Math.PI*2);
+  X.fillStyle='#e8c870'; X.fill();
+  X.beginPath();
+  X.ellipse(0,4,12,9,0,0,Math.PI*2);
+  X.fillStyle='#f5dfa0'; X.fill();
+
+  // ── EARS (floppy) ─────────────────────────────────────────────────────────
+  const eDroop = MODE==='sad'?0.55:MODE==='curious'?.0:0.22;
+  const eWig   = earWiggle>0 ? Math.sin(T*.18)*0.15*(earWiggle/12) : 0;
+  if(earWiggle>0) earWiggle--;
+
+  // left ear
+  X.save(); X.translate(-26,-16);
+  X.rotate(-0.05 + eDroop + eWig);
+  X.beginPath();
+  X.moveTo(0,0);
+  X.bezierCurveTo(-10,2,-14,12,-12,26);
+  X.bezierCurveTo(-10,36,-2,38,4,34);
+  X.bezierCurveTo(10,30,10,18,6,6);
+  X.bezierCurveTo(4,2,2,0,0,0);
+  X.fillStyle='#a06820'; X.fill();
+  // inner ear
+  X.beginPath();
+  X.moveTo(-1,4);
+  X.bezierCurveTo(-6,6,-8,14,-7,24);
+  X.bezierCurveTo(-5,30,-1,31,2,28);
+  X.bezierCurveTo(5,25,5,16,3,8);
+  X.fillStyle='#c89040'; X.fill();
+  X.restore();
+
+  // right ear
+  X.save(); X.translate(26,-16);
+  X.rotate(0.05 - eDroop - eWig);
+  X.beginPath();
+  X.moveTo(0,0);
+  X.bezierCurveTo(10,2,14,12,12,26);
+  X.bezierCurveTo(10,36,2,38,-4,34);
+  X.bezierCurveTo(-10,30,-10,18,-6,6);
+  X.bezierCurveTo(-4,2,-2,0,0,0);
+  X.fillStyle='#a06820'; X.fill();
+  X.beginPath();
+  X.moveTo(1,4);
+  X.bezierCurveTo(6,6,8,14,7,24);
+  X.bezierCurveTo(5,30,1,31,-2,28);
+  X.bezierCurveTo(-5,25,-5,16,-3,8);
+  X.fillStyle='#c89040'; X.fill();
+  X.restore();
+
+  // ── EYES ──────────────────────────────────────────────────────────────────
+  const eyeY = -14;
+  const lookOff = (st==='look') ? lookX*1.2 : (MODE==='curious'? -3 : 0);
+  const eOpen = blinkOpen ? 7 : 0.7;
+if(isLove){
+  X.font = '18px serif';
+  X.fillText('❤️', -20, eyeY + 5);
+  X.fillText('❤️', 4, eyeY + 5);
+}
+else
+
+  [-11,11].forEach((ex,i)=>{
+    // white
+    X.beginPath(); X.ellipse(ex,eyeY,6,eOpen+1.5,0,0,Math.PI*2);
+    X.fillStyle='#fffaf5'; X.fill();
+    // iris — dark amber brown
+    X.beginPath(); X.ellipse(ex+lookOff*.5*(i?1:-1),eyeY,4,Math.min(eOpen,5.5),0,0,Math.PI*2);
+    X.fillStyle='#5c3210'; X.fill();
+    // pupil
+    X.beginPath(); X.ellipse(ex+lookOff*.5*(i?1:-1),eyeY,2.2,Math.min(eOpen,4),0,0,Math.PI*2);
+    X.fillStyle='#1a0a04'; X.fill();
+    // shine
+    if(blinkOpen){
+      X.beginPath(); X.arc(ex+lookOff*.5*(i?1:-1)-1.2,eyeY-2,1.4,0,Math.PI*2);
+      X.fillStyle='rgba(255,255,255,.85)'; X.fill();
+      X.beginPath(); X.arc(ex+lookOff*.5*(i?1:-1)+1.5,eyeY+1.5,.7,0,Math.PI*2);
+      X.fillStyle='rgba(255,255,255,.45)'; X.fill();
+    }
+    // watery eyes when sad/beg
+    if((MODE==='sad'||MODE==='beg') && blinkOpen){
+      X.beginPath(); X.ellipse(ex,eyeY+eOpen*.9,5,1.4,0,0,Math.PI*2);
+      X.fillStyle='rgba(160,210,255,.55)'; X.fill();
+    }
+    // sparkle when beg
+    if(MODE==='beg' && blinkOpen){
+      X.font='9px serif'; X.fillStyle='rgba(255,220,60,.95)';
+      X.fillText('✦', ex-5, eyeY-8+Math.sin(T*.1)*.6);
+    }
+  });
+
+  // ── EYEBROWS ──────────────────────────────────────────────────────────────
+  X.lineWidth=2; X.lineCap='round';
+  if(MODE==='sad'||MODE==='beg'){
+    X.beginPath(); X.moveTo(-16,eyeY-9); X.lineTo(-6,eyeY-6);
+    X.strokeStyle='#6b3818'; X.stroke();
+    X.beginPath(); X.moveTo(16,eyeY-9); X.lineTo(6,eyeY-6);
+    X.stroke();
+  } else if(MODE==='happy'){
+    X.beginPath(); X.moveTo(-16,eyeY-10); X.lineTo(-6,eyeY-11);
+    X.strokeStyle='#6b3818'; X.stroke();
+    X.beginPath(); X.moveTo(16,eyeY-10); X.lineTo(6,eyeY-11);
+    X.stroke();
+  } else if(MODE==='curious'||st==='curious'){
+    X.beginPath(); X.moveTo(-15,eyeY-9); X.lineTo(-5,eyeY-7);
+    X.strokeStyle='#6b3818'; X.stroke();
+    X.beginPath(); X.moveTo(15,eyeY-11); X.lineTo(5,eyeY-8);
+    X.stroke();
+  } else {
+    X.beginPath(); X.moveTo(-15,eyeY-8); X.lineTo(-5,eyeY-8);
+    X.strokeStyle='#6b3818'; X.stroke();
+    X.beginPath(); X.moveTo(15,eyeY-8); X.lineTo(5,eyeY-8);
+    X.stroke();
+  }
+
+  // ── NOSE ──────────────────────────────────────────────────────────────────
+  // nose sniff animation
+  const noseScale = st==='sniff' ? 1+Math.abs(Math.sin(sniffPhase))*.12 : 1;
+  X.save(); X.translate(0,-1); X.scale(noseScale,noseScale);
+  X.beginPath();
+  X.moveTo(-8,0); X.bezierCurveTo(-8,-6,8,-6,8,0);
+  X.bezierCurveTo(8,5,-8,5,-8,0);
+  X.fillStyle='#2a1206'; X.fill();
+  // nostrils
+  X.beginPath(); X.ellipse(-3,1,2,1.5,-.3,0,Math.PI*2);
+  X.beginPath(); X.ellipse(3,1,2,1.5,.3,0,Math.PI*2);
+  X.fillStyle='rgba(0,0,0,.4)'; X.fill();
+  // shine
+  X.beginPath(); X.ellipse(-2,-2,2,1.2,-.5,0,Math.PI*2);
+  X.fillStyle='rgba(255,255,255,.25)'; X.fill();
+  X.restore();
+
+  // ── MOUTH ─────────────────────────────────────────────────────────────────
+  if(st==='yawn'){
+    yawnOpen += yawnDir*1.8;
+    if(yawnOpen>20){ yawnDir=-1; }
+    if(yawnOpen<0){ yawnOpen=0; yawnDir=1; }
+    // open mouth
+    X.beginPath();
+    X.moveTo(-9,7); X.bezierCurveTo(-9,7+yawnOpen,9,7+yawnOpen,9,7);
+    X.fillStyle='#7a2818'; X.fill();
+    X.beginPath(); X.moveTo(-9,7); X.bezierCurveTo(0,14,9,7,9,7);
+    X.strokeStyle='#5c2010'; X.lineWidth=1.5; X.stroke();
+    // tongue in yawn
+    if(yawnOpen>8){
+      X.beginPath(); X.ellipse(0,9+yawnOpen*.5,6,yawnOpen*.35,0,0,Math.PI*2);
+      X.fillStyle='#d06070'; X.fill();
+    }
+  } else if(MODE==='happy'){
+    tongueWag+=.08;
+    // open smile
+    X.beginPath();
+    X.moveTo(-10,7); X.bezierCurveTo(-10,16,10,16,10,7);
+    X.fillStyle='#7a2818'; X.fill();
+    X.beginPath(); X.moveTo(-10,7); X.bezierCurveTo(0,13,10,7,10,7);
+    X.strokeStyle='#5c2010'; X.lineWidth=1.5; X.stroke();
+    // panting tongue
+    X.beginPath();
+    X.ellipse(Math.sin(tongueWag)*2,16,6,7,0,0,Math.PI*2);
+    X.fillStyle='#e06878'; X.fill();
+    X.beginPath(); X.moveTo(0,10); X.lineTo(0,20);
+    X.strokeStyle='#c04060'; X.lineWidth=1.2; X.stroke();
+  } else if(MODE==='sad'||MODE==='beg'){
+    X.beginPath(); X.moveTo(-8,8); X.bezierCurveTo(-4,5,4,5,8,8);
+    X.strokeStyle='#5c2010'; X.lineWidth=1.8; X.lineCap='round'; X.stroke();
+  } else {
+    X.beginPath(); X.moveTo(-7,8); X.bezierCurveTo(0,12,7,8,7,8);
+    X.strokeStyle='#5c2010'; X.lineWidth=1.5; X.lineCap='round'; X.stroke();
+  }
+
+  // ── TEAR (sad) ────────────────────────────────────────────────────────────
+  if(MODE==='sad'){
+    tearY += .6;
+    if(tearY > 12) tearY = -14;
+    const ta = Math.max(0, 1-(tearY+14)/26);
+    X.beginPath();
+    X.moveTo(-14, tearY-3);
+    X.bezierCurveTo(-16,tearY,  -16,tearY+4, -14,tearY+6);
+    X.bezierCurveTo(-12,tearY+8,-11,tearY+4, -13,tearY);
+    X.fillStyle=`rgba(120,180,255,${ta*.7})`; X.fill();
+  }
+
+  // ── HEAD WRINKLE detail ───────────────────────────────────────────────────
+  X.beginPath(); X.moveTo(-5,-26); X.quadraticCurveTo(0,-30,5,-26);
+  X.strokeStyle='rgba(140,80,20,.18)'; X.lineWidth=1.2; X.stroke();
+
+  // cheek blush
+  X.beginPath(); X.ellipse(-21,-5,7,4,0,0,Math.PI*2);
+  X.fillStyle='rgba(220,100,80,.1)'; X.fill();
+  X.beginPath(); X.ellipse(21,-5,7,4,0,0,Math.PI*2);
+  X.fillStyle='rgba(220,100,80,.1)'; X.fill();
+
+  X.restore(); // end head
+
+  // floating hearts (happy)
+  if(MODE==='happy'){
+    const hf=T*.07;
+    X.font='15px serif'; X.fillStyle='rgba(232,80,106,.8)';
+    X.fillText('♡', 36+Math.sin(hf*1.1)*5, headY-44+Math.sin(hf)*.8*4);
+    X.font='10px serif';
+    X.fillText('♡',-48+Math.cos(hf*.7)*4, headY-32+Math.sin(hf*.9)*3);
+  }
+
+  X.restore(); // end main translate
+
+  // ─── idle behavior logic ───────────────────────────────────────────────────
+  T++;
+  if(MODE==='idle'){
+    idleTimer++;
+    behaviorTimer++;
+    if(idleTimer > 280 && behaviorTimer >= behaviorLen){
+      pickBehavior(); idleTimer=0;
+    }
+    // update sub-state animations
+    if(idleBehavior==='sniff') sniffPhase+=.09;
+    if(idleBehavior==='scratch') scratchPhase+=.22;
+    if(idleBehavior==='look'){
+      lookX += (lookTarget - lookX)*.05;
+    }
+  }
+  if(MODE==='curious') earWiggle=Math.min(earWiggle+.1,12);
+
+  requestAnimationFrame(draw);
+}
+
+// ─── kick off ─────────────────────────────────────────────────────────────────
+pickBehavior();
+draw();
+</script>
+</body>
+</html>
