@@ -32,6 +32,7 @@ html{ scroll-behavior:smooth; }
 
 @keyframes fadeUp{ from{ opacity:0; transform:translateY(18px); } to{ opacity:1; transform:translateY(0); } }
 @keyframes floatY{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-9px); } }
+@keyframes floatYGlow{ 0%,100%{ transform:translateX(-50%) translateY(0); } 50%{ transform:translateX(-50%) translateY(-9px); } }
 @keyframes shimmerGold{ 0%{ background-position:0% 50%; } 100%{ background-position:250% 50%; } }
 @keyframes drawLine{ to{ width:100%; } }
 @keyframes bgDrift{
@@ -201,7 +202,7 @@ header.scrolled nav{ padding:9px 24px; }
   width:320px; height:320px; border-radius:50%;
   background:radial-gradient(circle, rgba(193,39,45,0.16), transparent 68%);
   filter:blur(6px); z-index:0;
-  animation:floatY 5.5s ease-in-out infinite;
+  animation:floatYGlow 5.5s ease-in-out infinite;
 }
 .phone-motion{
   animation:fadeUp .7s .3s ease both, floatY 4.6s 1.1s ease-in-out infinite;
