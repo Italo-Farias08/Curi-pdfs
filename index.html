@@ -487,7 +487,7 @@ footer b{ color:var(--red); }
 </section>
 
 <footer>
-  © 2026 <b>GOLD LINE</b> — agendamento automático via WhatsApp para barbearias.
+  © 2026 <b>GOLD LINE</b> — agendamendo automático.
 </footer>
 
 <script>
@@ -537,13 +537,11 @@ const io = new IntersectionObserver((entries) => {
 }, { threshold:0.12 });
 revealEls.forEach(el => io.observe(el));
 
-// header reacts to scroll
 const headerEl = document.querySelector('header');
 window.addEventListener('scroll', () => {
   headerEl.classList.toggle('scrolled', window.scrollY > 8);
 }, { passive:true });
 
-// phone mockup follows the cursor with a light 3D tilt
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const phoneTilt = document.getElementById('phoneTilt');
 const heroGrid = document.querySelector('.hero-grid');
