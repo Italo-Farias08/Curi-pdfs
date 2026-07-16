@@ -21,6 +21,32 @@
 
 *{ margin:0; padding:0; box-sizing:border-box; }
 html{ scroll-behavior:smooth; }
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{
+    animation-duration:0.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:0.01ms !important;
+    scroll-behavior:auto !important;
+  }
+}
+
+@keyframes fadeUp{ from{ opacity:0; transform:translateY(18px); } to{ opacity:1; transform:translateY(0); } }
+@keyframes floatY{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-9px); } }
+@keyframes shimmerGold{ 0%{ background-position:0% 50%; } 100%{ background-position:250% 50%; } }
+@keyframes drawLine{ to{ width:100%; } }
+@keyframes bgDrift{
+  0%,100%{ background-position:0% 0%, 100% 0%, 50% 100%; }
+  50%{ background-position:8% 6%, 92% 14%, 54% 94%; }
+}
+@keyframes pulseRing{
+  0%{ box-shadow:0 0 0 0 rgba(193,39,45,0.55); }
+  70%{ box-shadow:0 0 0 15px rgba(193,39,45,0); }
+  100%{ box-shadow:0 0 0 0 rgba(193,39,45,0); }
+}
+@keyframes glowPulse{
+  0%,100%{ text-shadow:0 0 0 rgba(193,39,45,0); }
+  50%{ text-shadow:0 0 18px rgba(193,39,45,0.55); }
+}
 body{
   background:var(--bg);
   color:var(--cream);
@@ -30,13 +56,14 @@ body{
   overflow-x:hidden;
   position:relative;
 }
-/* ambient warm glow — keeps the black from going flat/dead */
 body::before{
   content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
   background:
     radial-gradient(circle at 12% -4%, rgba(193,39,45,0.10), transparent 42%),
     radial-gradient(circle at 88% 22%, rgba(201,163,94,0.07), transparent 48%),
     radial-gradient(circle at 50% 100%, rgba(193,39,45,0.06), transparent 50%);
+  background-size:160% 160%;
+  animation:bgDrift 24s ease-in-out infinite;
 }
 header, .hero, .section, .cut-divider, .final-cta, footer{ position:relative; z-index:1; }
 
@@ -47,7 +74,8 @@ h1,h2{
   letter-spacing:0.015em;
   line-height:0.98;
 }
-.script{ font-family:'Caveat', cursive; text-transform:none; font-weight:700; color:var(--red); font-size:1.18em; }
+.script{ font-family:'Caveat', cursive; text-transform:none; font-weight:700; color:var(--red); font-size:1.18em; display:inline-block; }
+.hero h1 .script{ animation:glowPulse 3.2s ease-in-out 1.8s infinite; }
 a{ color:inherit; text-decoration:none; }
 img{ max-width:100%; display:block; }
 .container{ max-width:1080px; margin:0 auto; padding:0 24px; }
@@ -64,26 +92,34 @@ img{ max-width:100%; display:block; }
 }
 .eyebrow::before{ content:""; width:20px; height:2px; background:var(--gold); display:inline-block; opacity:0.8; }
 
-/* ---------- nav ---------- */
 header{
   position:sticky; top:0; z-index:50;
   background:rgba(14,12,9,0.88);
   backdrop-filter:blur(10px);
   border-bottom:1px solid rgba(242,233,216,0.08);
+  transition:box-shadow .3s ease;
 }
+header.scrolled{ box-shadow:0 10px 30px -18px rgba(0,0,0,0.7); }
 nav{
   display:flex; align-items:center; justify-content:space-between;
   padding:14px 24px;
   max-width:1080px; margin:0 auto;
+  transition:padding .3s ease;
 }
-.logo{ display:flex; align-items:center; gap:10px; }
-.logo .pole{
-  width:22px; height:22px; border-radius:50%; flex-shrink:0;
-  background:repeating-linear-gradient(45deg, var(--red) 0 3.5px, var(--cream) 3.5px 7px, #14110B 7px 10.5px);
-  border:1px solid rgba(242,233,216,0.25);
+header.scrolled nav{ padding:9px 24px; }
+.logo{ display:flex; flex-direction:column; align-items:flex-start; gap:5px; }
+.logo .word{ font-family:'Bebas Neue', sans-serif; font-size:1.3rem; letter-spacing:0.07em; color:var(--cream); line-height:1; }
+.logo .gold-text{
+  background:linear-gradient(90deg, #9C7A34, var(--gold), #F3DEA6, var(--gold), #9C7A34);
+  background-size:250% 100%;
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  animation:shimmerGold 7s linear infinite;
 }
-.logo .word{ font-family:'Bebas Neue', sans-serif; font-size:1.3rem; letter-spacing:0.05em; color:var(--cream); }
-.logo .word b{ color:var(--red); font-weight:400; }
+.logo-line{
+  display:block; height:2px; width:0;
+  background:linear-gradient(90deg, var(--gold), transparent);
+  animation:drawLine 1.1s .5s cubic-bezier(.65,0,.35,1) forwards;
+}
 
 .btn{
   display:inline-flex; align-items:center; justify-content:center; gap:8px;
@@ -97,21 +133,39 @@ nav{
   white-space:nowrap;
 }
 .btn:hover{ transform:translateY(-2px); }
-.btn-primary{ background:var(--red); color:var(--cream); box-shadow:0 8px 24px -8px rgba(193,39,45,0.65); }
+.btn-primary{
+  background:var(--red); color:var(--cream);
+  box-shadow:0 8px 24px -8px rgba(193,39,45,0.65);
+  position:relative; overflow:hidden;
+}
 .btn-primary:hover{ background:var(--red-deep); }
+.btn-primary::before{
+  content:""; position:absolute; top:0; left:-60%; width:40%; height:100%;
+  background:linear-gradient(120deg, transparent, rgba(255,255,255,0.35), transparent);
+  transform:skewX(-20deg); transition:left .55s ease; pointer-events:none;
+}
+.btn-primary:hover::before{ left:130%; }
+.btn-primary::after{
+  content:""; position:absolute; inset:0; border-radius:inherit;
+  animation:pulseRing 2.6s ease-out infinite; pointer-events:none;
+}
 .btn-outline{ background:transparent; color:var(--cream); border-color:rgba(242,233,216,0.28); }
 .btn-outline:hover{ background:rgba(242,233,216,0.07); border-color:rgba(242,233,216,0.45); }
 .btn svg{ width:15px; height:15px; color:var(--wa-green); }
 .btn-sm{ padding:9px 16px; font-size:0.8rem; }
 
-/* ---------- hero ---------- */
 .hero{ padding:58px 0 44px; }
 .hero-grid{ display:grid; grid-template-columns:1.05fr 340px; gap:48px; align-items:start; }
 .hero h1{ font-size:clamp(2.5rem, 5.2vw, 3.6rem); margin:16px 0 18px; color:var(--cream); }
 .hero p.lead{ font-size:1.02rem; color:var(--cream-dim); max-width:460px; margin-bottom:26px; }
 .hero-actions{ display:flex; gap:12px; flex-wrap:wrap; margin-bottom:32px; }
 
-/* price board — a warm, backlit menu-board card glowing against the dark page */
+.hero-grid > div:first-child > .eyebrow{ animation:fadeUp .7s ease both; }
+.hero-grid > div:first-child > h1{ animation:fadeUp .7s .12s ease both; }
+.hero-grid > div:first-child > p.lead{ animation:fadeUp .7s .24s ease both; }
+.hero-grid > div:first-child > .hero-actions{ animation:fadeUp .7s .36s ease both; }
+.hero-grid > div:first-child > .price-board{ animation:fadeUp .7s .48s ease both; }
+
 .price-board{
   background:linear-gradient(160deg,#241D12,#150F09);
   color:var(--cream);
@@ -120,6 +174,11 @@ nav{
   padding:24px 26px 22px;
   max-width:400px;
   box-shadow:0 30px 60px -26px rgba(0,0,0,0.8), 0 0 44px -12px rgba(193,39,45,0.22);
+  transition:transform .35s ease, box-shadow .35s ease;
+}
+.price-board:hover{
+  transform:translateY(-5px);
+  box-shadow:0 34px 70px -24px rgba(0,0,0,0.85), 0 0 60px -10px rgba(193,39,45,0.32);
 }
 .price-board .tag{
   font-weight:700; font-size:0.68rem; letter-spacing:0.16em; color:var(--gold);
@@ -136,13 +195,21 @@ nav{
 }
 .price-note{ margin-top:11px; font-size:0.76rem; color:rgba(242,233,216,0.5); }
 
-/* ---------- phone mockup ---------- */
 .phone-col{ display:flex; flex-direction:column; align-items:center; gap:12px; position:relative; }
 .phone-col::before{
   content:""; position:absolute; top:6%; left:50%; transform:translateX(-50%);
   width:320px; height:320px; border-radius:50%;
   background:radial-gradient(circle, rgba(193,39,45,0.16), transparent 68%);
   filter:blur(6px); z-index:0;
+  animation:floatY 5.5s ease-in-out infinite;
+}
+.phone-motion{
+  animation:fadeUp .7s .3s ease both, floatY 4.6s 1.1s ease-in-out infinite;
+}
+.phone-tilt{
+  transition:transform .2s ease-out;
+  transform-style:preserve-3d;
+  will-change:transform;
 }
 .phone{
   width:266px;
@@ -186,7 +253,6 @@ nav{
   .price-board{ max-width:none; }
 }
 
-/* ---------- cut divider — scissors "cutting" a dashed line ---------- */
 .cut-divider{ position:relative; height:1px; max-width:1080px; margin:8px auto 8px; }
 .cut-divider::before{
   content:""; position:absolute; top:0; left:24px; right:24px;
@@ -198,16 +264,25 @@ nav{
   display:flex; align-items:center; justify-content:center; z-index:2;
 }
 .cut-icon svg{ width:24px; height:24px; }
+.cut-icon.reveal-snip{
+  opacity:0; transform:translate(-50%,-50%) rotate(-52deg) scale(.4);
+  transition:opacity .5s ease, transform .6s cubic-bezier(.34,1.56,.64,1);
+}
+.cut-icon.reveal-snip.in{ opacity:1; transform:translate(-50%,-50%) rotate(-14deg) scale(1); }
 
-/* ---------- feature toolkit ---------- */
 .section{ padding:54px 0; }
 .section-tight-top{ padding-top:26px; }
 .tool-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:34px; margin-top:8px; }
 .tool-icon{
   width:60px; height:60px; border-radius:50%; border:1.5px solid rgba(242,233,216,0.18);
   display:flex; align-items:center; justify-content:center; margin-bottom:18px;
+  transition:transform .35s ease, border-color .35s ease;
 }
 .tool-icon svg{ width:28px; height:28px; stroke:var(--red); fill:none; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+.tool-item:hover .tool-icon{ transform:scale(1.08) rotate(-6deg); border-color:var(--red); }
+.tool-grid .tool-item:nth-child(1){ transition-delay:0s; }
+.tool-grid .tool-item:nth-child(2){ transition-delay:.12s; }
+.tool-grid .tool-item:nth-child(3){ transition-delay:.24s; }
 .tool-item h4{ font-family:'Bebas Neue', sans-serif; text-transform:uppercase; letter-spacing:0.02em; font-size:1.2rem; margin-bottom:8px; color:var(--cream); }
 .tool-item p{ font-size:0.9rem; color:var(--cream-dim); max-width:280px; }
 
@@ -215,22 +290,29 @@ nav{
   .tool-grid{ grid-template-columns:1fr; gap:30px; }
 }
 
-/* ---------- faq ---------- */
 .faq-list{ max-width:680px; }
 .faq-item{ border-bottom:1px solid var(--hair); padding:19px 0; }
 .faq-item:first-child{ border-top:1px solid var(--hair); }
-.faq-q{ display:flex; align-items:center; justify-content:space-between; gap:18px; cursor:pointer; font-weight:600; font-size:0.99rem; color:var(--cream); }
+.faq-q{ display:flex; align-items:center; justify-content:space-between; gap:18px; cursor:pointer; font-weight:600; font-size:0.99rem; color:var(--cream); transition:color .2s ease; }
+.faq-q:hover{ color:var(--gold); }
+.faq-list .faq-item:nth-child(1){ transition-delay:0s; }
+.faq-list .faq-item:nth-child(2){ transition-delay:.08s; }
+.faq-list .faq-item:nth-child(3){ transition-delay:.16s; }
+.faq-list .faq-item:nth-child(4){ transition-delay:.24s; }
+.faq-list .faq-item:nth-child(5){ transition-delay:.32s; }
 .faq-q .plus{ font-weight:700; font-size:1.2rem; color:var(--red); transition:transform .2s ease; flex-shrink:0; }
 .faq-item.open .plus{ transform:rotate(45deg); }
 .faq-a{ max-height:0; overflow:hidden; color:var(--cream-dim); font-size:0.89rem; transition:max-height .25s ease; }
 .faq-item.open .faq-a{ max-height:200px; padding-top:11px; }
 
-/* ---------- final cta ---------- */
 .final-cta{ padding:66px 0 32px; text-align:center; }
 .final-cta .eyebrow{ justify-content:center; }
 .final-cta h2{ font-size:clamp(2rem,4.2vw,3rem); max-width:620px; margin:16px auto 28px; color:var(--cream); }
 .final-actions{ display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
 .final-note{ margin-top:20px; font-size:0.82rem; color:rgba(242,233,216,0.5); }
+.final-cta .eyebrow.reveal{ transition-delay:0s; }
+.final-cta h2.reveal{ transition-delay:.1s; }
+.final-cta .final-actions.reveal{ transition-delay:.2s; }
 
 footer{ border-top:1px solid rgba(242,233,216,0.1); padding:24px 0; text-align:center; font-size:0.78rem; color:rgba(242,233,216,0.55); }
 footer b{ color:var(--red); }
@@ -250,7 +332,8 @@ footer b{ color:var(--red); }
 <header>
   <nav>
     <div class="logo">
-      <span class="word">Saas <b>Agendas</b></span>
+      <span class="word"><span class="gold-text">GOLD</span> LINE</span>
+      <span class="logo-line"></span>
     </div>
     <a class="btn btn-outline btn-sm" href="https://wa.me/5581991204180?text=Oi!%20Quero%20saber%20mais%20sobre%20a%20GOLD%20LINE" target="_blank" rel="noopener">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12c0 1.9.5 3.7 1.5 5.3L2 22l4.9-1.4C8.4 21.5 10.1 22 12 22c5.5 0 10-4.5 10-10S17.5 2 12 2zm0 18c-1.6 0-3.1-.4-4.4-1.2l-.3-.2-2.9.8.8-2.8-.2-.3C4.4 15 4 13.5 4 12c0-4.4 3.6-8 8-8s8 3.6 8 8-3.6 8-8 8zm4.4-5.9c-.2-.1-1.4-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.2-.6.8-.8 1-.1.2-.3.2-.5.1-.2-.1-1-.4-2-1.2-.7-.7-1.2-1.5-1.4-1.7-.1-.2 0-.4.1-.5.1-.1.3-.3.4-.5.1-.1.2-.3.2-.4.1-.2 0-.3 0-.5-.1-.1-.6-1.4-.8-1.9-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.2-.9.9-.9 2.1s.9 2.4 1.1 2.6c.1.2 1.8 2.7 4.3 3.8.6.3 1.1.4 1.4.5.6.2 1.2.2 1.6.1.5-.1 1.4-.6 1.6-1.1.2-.5.2-1 .1-1.1-.1-.1-.2-.2-.4-.3z"/></svg>
@@ -259,7 +342,6 @@ footer b{ color:var(--red); }
   </nav>
 </header>
 
-<!-- ================= HERO ================= -->
 <section class="hero">
   <div class="container hero-grid">
     <div>
@@ -287,19 +369,23 @@ footer b{ color:var(--red); }
     </div>
 
     <div class="phone-col">
-      <div class="phone">
-        <div class="phone-screen">
-          <div class="phone-topbar">
-            <div class="avatar">G</div>
-            <div>
-              Gold Line Barbearia
-              <div class="sub">online agora</div>
+      <div class="phone-motion">
+        <div class="phone-tilt" id="phoneTilt">
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="phone-topbar">
+                <div class="avatar">G</div>
+                <div>
+                  Gold Line Barbearia
+                  <div class="sub">online agora</div>
+                </div>
+              </div>
+              <div class="chat-area" id="chat-area"></div>
+              <div class="phone-input">
+                <div class="field"></div>
+                <div class="mic"></div>
+              </div>
             </div>
-          </div>
-          <div class="chat-area" id="chat-area"></div>
-          <div class="phone-input">
-            <div class="field"></div>
-            <div class="mic"></div>
           </div>
         </div>
       </div>
@@ -309,7 +395,7 @@ footer b{ color:var(--red); }
 </section>
 
 <div class="cut-divider">
-  <div class="cut-icon">
+  <div class="cut-icon reveal-snip">
     <svg viewBox="0 0 24 24" fill="none" stroke="#C1272D" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="6" cy="6" r="2.6"/><circle cx="6" cy="18" r="2.6"/>
       <path d="M8.2 7.6 20 18M8.2 16.4 20 6"/>
@@ -317,7 +403,6 @@ footer b{ color:var(--red); }
   </div>
 </div>
 
-<!-- ================= FEATURES ================= -->
 <section class="section section-tight-top">
   <div class="container">
     <div class="eyebrow">O QUE VEM NO PLANO</div>
@@ -348,7 +433,7 @@ footer b{ color:var(--red); }
 </section>
 
 <div class="cut-divider">
-  <div class="cut-icon">
+  <div class="cut-icon reveal-snip">
     <svg viewBox="0 0 24 24" fill="none" stroke="#C1272D" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="6" cy="6" r="2.6"/><circle cx="6" cy="18" r="2.6"/>
       <path d="M8.2 7.6 20 18M8.2 16.4 20 6"/>
@@ -356,28 +441,27 @@ footer b{ color:var(--red); }
   </div>
 </div>
 
-<!-- ================= FAQ ================= -->
 <section class="section section-tight-top">
   <div class="container">
     <div class="eyebrow">DÚVIDAS COMUNS</div>
     <div class="faq-list" style="margin-top:18px;">
-      <div class="faq-item">
+      <div class="faq-item reveal">
         <div class="faq-q">Preciso saber mexer em sistema pra usar?<span class="plus">+</span></div>
         <div class="faq-a">Não. Se você sabe usar WhatsApp, sabe usar a GOLD LINE. Nós fazemos sua configuração.</div>
       </div>
-      <div class="faq-item">
+      <div class="faq-item reveal">
         <div class="faq-q">O número de WhatsApp precisa ser um número novo?<span class="plus">+</span></div>
         <div class="faq-a">Pode ser o número que você já usa hoje. A conexão é feita com QR Code, do mesmo jeito que se conecta o WhatsApp Web.</div>
       </div>
-      <div class="faq-item">
+      <div class="faq-item reveal">
         <div class="faq-q">E se eu tiver mais de um barbeiro?<span class="plus">+</span></div>
         <div class="faq-a">O plano de R$30 já cobre a barbearia inteira, com quantos profissionais você tiver, cada um com sua própria agenda.</div>
       </div>
-      <div class="faq-item">
+      <div class="faq-item reveal">
         <div class="faq-q">Depois dos 15 dias, se eu não gostar?<span class="plus">+</span></div>
         <div class="faq-a">Você simplesmente não continua. Sem cartão cadastrado no teste, sem cobrança automática.</div>
       </div>
-      <div class="faq-item">
+      <div class="faq-item reveal">
         <div class="faq-q">Como eu tiro dúvidas?<span class="plus">+</span></div>
         <div class="faq-a">Direto pelo nosso WhatsApp — (81) 99120-4180</div>
       </div>
@@ -385,12 +469,11 @@ footer b{ color:var(--red); }
   </div>
 </section>
 
-<!-- ================= CTA FINAL ================= -->
 <section class="final-cta">
   <div class="container">
-    <div class="eyebrow">GOLD LINE </div>
-    <h2>Sua barbearia recebendo agendamento pelo whatsapp <span class="script">ainda hoje</span>.</h2>
-    <div class="final-actions">
+    <div class="eyebrow reveal">GOLD LINE </div>
+    <h2 class="reveal">Sua barbearia recebendo agendamento pelo whatsapp <span class="script">ainda hoje</span>.</h2>
+    <div class="final-actions reveal">
       <a class="btn btn-primary" href="https://barbearias-flax.vercel.app/projeto/cadastro.html" target="_blank" >Criar minha barbearia grátis</a>
       <a class="btn btn-outline" href="https://wa.me/5581991204180?text=Oi!%20Quero%20come%C3%A7ar%20a%20usar%20a%20GOLD%20LINE" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12c0 1.9.5 3.7 1.5 5.3L2 22l4.9-1.4C8.4 21.5 10.1 22 12 22c5.5 0 10-4.5 10-10S17.5 2 12 2zm0 18c-1.6 0-3.1-.4-4.4-1.2l-.3-.2-2.9.8.8-2.8-.2-.3C4.4 15 4 13.5 4 12c0-4.4 3.6-8 8-8s8 3.6 8 8-3.6 8-8 8zm4.4-5.9c-.2-.1-1.4-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.2-.6.8-.8 1-.1.2-.3.2-.5.1-.2-.1-1-.4-2-1.2-.7-.7-1.2-1.5-1.4-1.7-.1-.2 0-.4.1-.5.1-.1.3-.3.4-.5.1-.1.2-.3.2-.4.1-.2 0-.3 0-.5-.1-.1-.6-1.4-.8-1.9-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.2-.9.9-.9 2.1s.9 2.4 1.1 2.6c.1.2 1.8 2.7 4.3 3.8.6.3 1.1.4 1.4.5.6.2 1.2.2 1.6.1.5-.1 1.4-.6 1.6-1.1.2-.5.2-1 .1-1.1-.1-.1-.2-.2-.4-.3z"/></svg>
@@ -446,11 +529,38 @@ document.querySelectorAll('.faq-item').forEach(item => {
   });
 });
 
-const revealEls = document.querySelectorAll('.reveal');
+const revealEls = document.querySelectorAll('.reveal, .reveal-snip');
 const io = new IntersectionObserver((entries) => {
   entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
 }, { threshold:0.12 });
 revealEls.forEach(el => io.observe(el));
+
+// header reacts to scroll
+const headerEl = document.querySelector('header');
+window.addEventListener('scroll', () => {
+  headerEl.classList.toggle('scrolled', window.scrollY > 8);
+}, { passive:true });
+
+// phone mockup follows the cursor with a light 3D tilt
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const phoneTilt = document.getElementById('phoneTilt');
+const heroGrid = document.querySelector('.hero-grid');
+if (phoneTilt && heroGrid && !prefersReducedMotion) {
+  const maxTilt = 9;
+  heroGrid.addEventListener('mousemove', (e) => {
+    const rect = phoneTilt.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = (e.clientX - cx) / (rect.width / 2);
+    const dy = (e.clientY - cy) / (rect.height / 2);
+    const rx = Math.max(-1, Math.min(1, -dy)) * maxTilt;
+    const ry = Math.max(-1, Math.min(1, dx)) * maxTilt;
+    phoneTilt.style.transform = `perspective(900px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`;
+  });
+  heroGrid.addEventListener('mouseleave', () => {
+    phoneTilt.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg)';
+  });
+}
 </script>
 </body>
 </html>
