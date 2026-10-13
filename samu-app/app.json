@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "SAMU Vitória",
+    "slug": "samu-vitoria",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "icon": "./assets/logo-samu.png",
+    "ios": { "supportsTablet": false },
+    "android": { "package": "org.iamtec.samuvitoria" }
+  }
+}
